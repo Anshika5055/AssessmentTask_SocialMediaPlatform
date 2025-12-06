@@ -1,0 +1,68 @@
+<div class="feed-container">
+  <h1>User Feed</h1>
+  
+  <div *ngIf="feedItems.length === 0" class="empty-state">
+    <p>No feed items available.</p>
+  </div>
+
+  <div *ngFor="let item of feedItems" class="feed-item">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <span *ngIf="item.type === 'post'">📝 Post by {{ item.user.userName }}</span>
+          <span *ngIf="item.type === 'like'">❤️ {{ item.user.userName }} liked</span>
+          <span *ngIf="item.type === 'comment'">💬 {{ item.user.userName }} commented</span>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="post-content">
+          <p><strong>Post:</strong> {{ item.post.content }}</p>
+          <p class="post-author">By: {{ getUserName(item.post.userID) }}</p>
+        </div>
+        
+        <div *ngIf="item.type === 'comment' && item.comment" class="comment-content">
+          <p><strong>Comment:</strong> {{ item.comment.content }}</p>
+        </div>
+
+        <div *ngIf="selectedUser && item.post.userID !== selectedUser.userID" class="actions">
+          <button 
+            mat-raised-button 
+            [color]="isPostLiked(item.post.postID) ? 'warn' : 'primary'"
+            (click)="likePost(item.post.postID)">
+            {{ isPostLiked(item.post.postID) ? 'Unlike' : 'Like' }}
+          </button>
+          
+          <div class="comment-section">
+            <mat-form-field appearance="outline" style="width: 100%; display: block;">
+              <mat-label>Add a comment</mat-label>
+              <textarea 
+                matInput 
+                [(ngModel)]="newComment[item.post.postID]" 
+                rows="3"
+                placeholder="Write a comment..."
+                style="resize: vertical; color: #000000; background-color: #ffffff;">
+              </textarea>
+            </mat-form-field>
+            <button 
+              mat-raised-button 
+              color="primary" 
+              (click)="addComment(item.post.postID)">
+              Comment
+            </button>
+            <div *ngIf="moderationError[item.post.postID]" class="error-message">
+              {{ moderationError[item.post.postID] }}
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="getCommentsForPost(item.post.postID).length > 0" class="comments-list">
+          <h4>Comments:</h4>
+          <div *ngFor="let comment of getCommentsForPost(item.post.postID)" class="comment-item">
+            <p><strong>{{ getUserName(comment.userID) }}:</strong> {{ comment.content }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
